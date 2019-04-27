@@ -1,47 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pr.c                                               :+:      :+:    :+:   */
+/*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ikrkharb <ikrkharb@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/04/18 22:29:24 by ikrkharb          #+#    #+#             */
-/*   Updated: 2019/04/18 22:33:50 by ikrkharb         ###   ########.fr       */
+/*   Created: 2019/04/26 00:18:24 by ikrkharb          #+#    #+#             */
+/*   Updated: 2019/04/26 15:00:45 by ikrkharb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <unistd.h>
-#include <fcntl.h>
 #include <stdio.h>
-#define SIZE 1024
+#include <stdlib.h>
+#include "get_next_line.h"
 
-int	main(int argc, char *argv[])
+int		main(void)
 {
 	int		fd;
-	char	buf[SIZE + 1];
-	int		n;
+	char	*line;
 	int		i;
 
-	if (argc == 1)
-	{
-		write(1, "File name missing.\n", 19);
-		return (1);
-	}
-	if (argc > 2)
-	{
-		write(1, "Too many arguments.\n", 20);
-		return (1);
-	}
-	fd = open(argv[1], O_RDONLY);
-	if (fd < 0)
-		return (1);
 	i = 0;
-	while ((n = read(fd, buf, SIZE)) != 0)
+	fd = open("input", O_RDONLY);
+	while (get_next_line(fd,&line) == 1)
 	{
-		printf("n = %d && i = %d\n", n, i); 
-		buf[n] = '\0';
-		//write(1, buf, n);
+		printf("%d  == %s\n", i, line);
+		ft_strdel(&line);
 		i++;
 	}
+	//printf("%s\n", line);
 	return (0);
 }

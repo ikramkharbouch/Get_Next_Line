@@ -6,53 +6,66 @@
 /*   By: ikrkharb <ikrkharb@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/18 22:20:04 by ikrkharb          #+#    #+#             */
-/*   Updated: 2019/04/18 22:56:55 by ikrkharb         ###   ########.fr       */
+/*   Updated: 2019/04/26 14:27:59 by ikrkharb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*find_newline(char *str)
+int		ft_is_found(char **line, char *buff, char *pos)
 {
-	int	len;
-	int	i;
+	char	*new;
+	char	*sub_str;
 
-	len = ft_strlen(str);
-	str = ft_strnew(len);
-	i = 0;
-	while (*str && *str != '\n')
+	if (!(sub_str = ft_strsub(buff, 0, pos - buff)))
+		return (0);
+	if (!(new = ft_strjoin(*line, sub_str)))
 	{
-		str++;
-		i++;
+		ft_strdel(&sub_str);
+		return (0);
 	}
-	return (str - i);
+	ft_strdel(line);
+	ft_strdel(&sub_str);
+	*line = new;
+	ft_strcpy(buff, pos + 1);
+	return (1);
+}
+
+int		ft_not_found(char **line, char *buff, int size)
+{
+	char	*tmp;
+
+	if (!(tmp = ft_strjoin(*line, buff)))
+		return (0);
+	ft_strdel(line);
+	*line = tmp;
+	ft_bzero(buff, size);
+	return (1);
 }
 
 int		get_next_line(const int fd, char **line)
 {
-	char	buff[BUFF_SIZE + 1];
-	int		size;
+	static char	buff[BUFF_SIZE + 1];
+	int			size;
+	char		*pos;
 
-	size = read(fd, buff, BUFF_SIZE);
-	*line = (char *)malloc(sizeof(char) * size);
-	if (fd < 0)
+	if (fd < 0 || read(fd, NULL, 0) == -1)
 		return (-1);
-	while (read(fd, buff, BUFF_SIZE) > 0)
+	if (!line)
+		return (-1);
+	*line = buff[0] ? ft_strdup(buff) : ft_strdup("");
+	while ((size = read(fd, buff, BUFF_SIZE)) > 0)
 	{
-		buff[BUFF_SIZE] = '\0';
-		*line = find_newline(buff);
-		return (1);
+		buff[size] = '\0';
+		if ((pos = ft_strchr(buff, '\n')))
+		{
+			if (!ft_is_found(line, buff, pos))
+				return (-1);
+			return (1);
+		}
+		else if (!ft_not_found(line, buff, size))
+			return (-1);
 	}
-	return (0);
-}
-
-int		main(void)
-{
-	int fd;
-	char	**line;
-
-	fd = open("file.txt", O_RDONLY);
-	if (get_next_line(fd, line))
-		printf("|line = %s|\n", *line);
+	ft_strdel(line);
 	return (0);
 }
